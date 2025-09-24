@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agrovision - Precision Agriculture Monitoring</title>
+    <meta name="description" content="AI-powered crop health monitoring using multispectral imaging and sensor data">
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2316a34a'%3E%3Cpath d='M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z'/%3E%3C/svg%3E">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div id="loadingScreen" class="loading-screen">
+        <div class="loading-container">
+            <div class="loading-spinner"></div>
+            <h2>Loading Agrovision AI</h2>
+            <p>Initializing your precision agriculture dashboard...</p>
+        </div>
+    </div>
+
+    <!-- Login Screen -->
+    <div id="loginScreen" class="auth-screen hidden">
+        <div class="auth-container">
+            <div class="auth-header">
+                <div class="logo">
+                    <i class="fas fa-seedling" aria-hidden="true"></i>
+                    <span>Agrovision AI</span>
+                </div>
+                <h1>Welcome to Precision Agriculture</h1>
+                <p>Monitor your crops with AI-powered insights</p>
+            </div>
+            
+            <div class="auth-form">
+                <form id="loginForm" novalidate>
+                    <div class="form-group">
+                        <label for="email" class="form-label">Email Address</label>
+                        <input type="email" id="email" name="email" class="form-control" required 
+                               aria-describedby="emailError" autocomplete="email">
+                        <div id="emailError" class="error-message" role="alert" aria-live="polite"></div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="password" class="form-label">Password</label>
+                        <div class="password-input">
+                            <input type="password" id="password" name="password" class="form-control" required
+                                   aria-describedby="passwordError" autocomplete="current-password">
+                            <button type="button" class="password-toggle" aria-label="Toggle password visibility">
+                                <i class="fas fa-eye" aria-hidden="true"></i>
+                            </button>
+                        </div>
+                        <div id="passwordError" class="error-message" role="alert" aria-live="polite"></div>
+                    </div>
+                    
+                    <button type="submit" class="btn btn--primary btn--full-width" id="loginBtn">
+                        <span>Sign In</span>
+                        <i class="fas fa-spinner fa-spin hidden" aria-hidden="true"></i>
+                    </button>
+                </form>
+                
+                <div class="auth-divider">
+                    <span>or</span>
+                </div>
+                
+                <button class="btn btn--outline btn--full-width" id="googleSignIn">
+                    <i class="fab fa-google" aria-hidden="true"></i>
+                    <span>Continue with Google</span>
+                </button>
+                
+                <div class="auth-footer">
+                    <p>Don't have an account? <a href="#" id="showSignup">Sign up here</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Onboarding Screen -->
+    <div id="onboardingScreen" class="onboarding-screen hidden">
+        <div class="onboarding-container">
+            <div class="onboarding-progress">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="onboardingProgress"></div>
+                </div>
+                <span id="progressText">Step 1 of 3</span>
+            </div>
+            
+            <div class="onboarding-content">
+                <!-- Step 1: Welcome -->
+                <div class="onboarding-step active" data-step="1">
+                    <div class="step-header">
+                        <h2>Welcome to Agrovision AI</h2>
+                        <p>Let's set up your farm profile to get started with AI-powered monitoring</p>
+                    </div>
+                    <form class="onboarding-form">
+                        <div class="form-group">
+                            <label for="farmName" class="form-label">Farm Name</label>
+                            <input type="text" id="farmName" class="form-control" placeholder="Enter your farm name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="ownerName" class="form-label">Owner Name</label>
+                            <input type="text" id="ownerName" class="form-control" placeholder="Your full name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="userRole" class="form-label">Your Role</label>
+                            <select id="userRole" class="form-control" required>
+                                <option value="">Select your role</option>
+                                <option value="farmer">Farmer</option>
+                                <option value="agronomist">Agronomist</option>
+                                <option value="technician">Technician</option>
+                                <option value="researcher">Researcher</option>
+                            </select>
+                        </div>
+                    </form>
+                </div>
+                
+                <!-- Step 2: Farm Details -->
+                <div class="onboarding-step" data-step="2">
+                    <div class="step-header">
+                        <h2>Farm Details</h2>
+                        <p>Tell us about your farming operation</p>
+                    </div>
+                    <form class="onboarding-form">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="farmArea" class="form-label">Total Area (hectares)</label>
+                                <input type="number" id="farmArea" class="form-control" placeholder="150" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="cropType" class="form-label">Primary Crop</label>
+                                <select id="cropType" class="form-control" required>
+                                    <option value="">Select crop type</option>
+                                    <option value="corn">Corn</option>
+                                    <option value="wheat">Wheat</option>
+                                    <option value="soybeans">Soybeans</option>
+                                    <option value="rice">Rice</option>
+                                    <option value="other">Other</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="irrigationSystem" class="form-label">Irrigation System</label>
+                            <select id="irrigationSystem" class="form-control" required>
+                                <option value="">Select irrigation system</option>
+                                <option value="drip">Drip irrigation</option>
+                                <option value="sprinkler">Sprinkler system</option>
+                                <option value="center-pivot">Center pivot</option>
+                                <option value="flood">Flood irrigation</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="location" class="form-label">Farm Location</label>
+                            <input type="text" id="location" class="form-control" placeholder="City, State/Country" required>
+                        </div>
+                    </form>
+                </div>
+                
+                <!-- Step 3: Monitoring Preferences -->
+                <div class="onboarding-step" data-step="3">
+                    <div class="step-header">
+                        <h2>Monitoring Preferences</h2>
+                        <p>Configure your monitoring and alert preferences</p>
+                    </div>
+                    <form class="onboarding-form">
+                        <div class="form-group">
+                            <label class="form-label">Alert Preferences</label>
+                            <div class="checkbox-group">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" value="disease" checked>
+                                    <span class="checkmark"></span>
+                                    Disease Risk Alerts
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" value="irrigation" checked>
+                                    <span class="checkmark"></span>
+                                    Irrigation Recommendations
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" value="pest" checked>
+                                    <span class="checkmark"></span>
+                                    Pest Monitoring
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" value="weather" checked>
+                                    <span class="checkmark"></span>
+                                    Weather Alerts
+                                </label>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="scanFrequency" class="form-label">Scanning Frequency</label>
+                            <select id="scanFrequency" class="form-control" required>
+                                <option value="">Select frequency</option>
+                                <option value="daily">Daily</option>
+                                <option value="weekly" selected>Weekly</option>
+                                <option value="biweekly">Bi-weekly</option>
+                                <option value="monthly">Monthly</option>
+                            </select>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <div class="onboarding-actions">
+                <button class="btn btn--outline" id="prevStep" disabled>Previous</button>
+                <button class="btn btn--primary" id="nextStep">Next</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Application -->
+    <div id="mainApp" class="main-app hidden">
+        <!-- Navigation Header -->
+        <header class="app-header">
+            <div class="header-content">
+                <div class="header-left">
+                    <div class="logo">
+                        <i class="fas fa-seedling" aria-hidden="true"></i>
+                        <span>Agrovision AI</span>
+                    </div>
+                    <nav class="main-nav" role="navigation">
+                        <button class="nav-item active" data-view="dashboard">
+                            <i class="fas fa-tachometer-alt" aria-hidden="true"></i>
+                            <span>Dashboard</span>
+                        </button>
+                        <button class="nav-item" data-view="fields">
+                            <i class="fas fa-map-marked-alt" aria-hidden="true"></i>
+                            <span>Fields</span>
+                        </button>
+                        <button class="nav-item" data-view="alerts">
+                            <i class="fas fa-bell" aria-hidden="true"></i>
+                            <span>Alerts</span>
+                            <span class="alert-badge" id="alertCount">2</span>
+                        </button>
+                        <button class="nav-item" data-view="analytics">
+                            <i class="fas fa-chart-line" aria-hidden="true"></i>
+                            <span>Analytics</span>
+                        </button>
+                    </nav>
+                </div>
+                <div class="header-right">
+                    <button class="notification-btn" aria-label="Notifications">
+                        <i class="fas fa-bell" aria-hidden="true"></i>
+                        <span class="notification-dot"></span>
+                    </button>
+                    <div class="user-menu">
+                        <button class="user-avatar" aria-label="User menu">
+                            <i class="fas fa-user-circle" aria-hidden="true"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="app-main">
+            <!-- Dashboard View -->
+            <div id="dashboardView" class="app-view active">
+                <div class="view-header">
+                    <h1>Farm Overview</h1>
+                    <p>Real-time monitoring across all your fields</p>
+                </div>
+                
+                <!-- Key Metrics -->
+                <div class="metrics-grid">
+                    <div class="metric-card">
+                        <div class="metric-icon">
+                            <i class="fas fa-seedling" aria-hidden="true"></i>
+                        </div>
+                        <div class="metric-content">
+                            <h3>Overall Health Score</h3>
+                            <div class="metric-value">88<span class="metric-unit">%</span></div>
+                            <div class="metric-trend positive">
+                                <i class="fas fa-arrow-up" aria-hidden="true"></i>
+                                <span>+5% from last week</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="metric-card">
+                        <div class="metric-icon">
+                            <i class="fas fa-tint" aria-hidden="true"></i>
+                        </div>
+                        <div class="metric-content">
+                            <h3>Avg. Soil Moisture</h3>
+                            <div class="metric-value">61<span class="metric-unit">%</span></div>
+                            <div class="metric-trend neutral">
+                                <i class="fas fa-minus" aria-hidden="true"></i>
+                                <span>Stable</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="metric-card">
+                        <div class="metric-icon">
+                            <i class="fas fa-thermometer-half" aria-hidden="true"></i>
+                        </div>
+                        <div class="metric-content">
+                            <h3>Avg. Temperature</h3>
+                            <div class="metric-value">24.8<span class="metric-unit">°C</span></div>
+                            <div class="metric-trend positive">
+                                <i class="fas fa-arrow-up" aria-hidden="true"></i>
+                                <span>Optimal range</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="metric-card">
+                        <div class="metric-icon">
+                            <i class="fas fa-chart-line" aria-hidden="true"></i>
+                        </div>
+                        <div class="metric-content">
+                            <h3>NDVI Average</h3>
+                            <div class="metric-value">0.73</div>
+                            <div class="metric-trend positive">
+                                <i class="fas fa-arrow-up" aria-hidden="true"></i>
+                                <span>Healthy vegetation</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Farm Cards -->
+                <div class="farms-section">
+                    <h2>Your Farms</h2>
+                    <div class="farms-grid" id="farmsGrid">
+                        <!-- Farm cards will be populated by JavaScript -->
+                    </div>
+                </div>
+
+                <!-- Weather Widget -->
+                <div class="weather-section">
+                    <div class="weather-card">
+                        <h3>Current Weather</h3>
+                        <div class="weather-content" id="weatherContent">
+                            <!-- Weather data will be populated by JavaScript -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Alerts -->
+                <div class="alerts-section">
+                    <h2>Recent Alerts</h2>
+                    <div class="alerts-list" id="alertsList">
+                        <!-- Alerts will be populated by JavaScript -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Fields View -->
+            <div id="fieldsView" class="app-view">
+                <div class="view-header">
+                    <h1>Field Monitoring</h1>
+                    <p>Detailed analysis of individual field conditions</p>
+                </div>
+                
+                <div class="field-details">
+                    <div class="field-selector">
+                        <select id="fieldSelect" class="form-control">
+                            <option value="1">Gitam Bengaluru Farm</option>
+                            <option value="2">Gitam Hyderabad Farm</option>
+                            <option value="3">Gitam Visakhapatnam Farm</option>
+                        </select>
+                    </div>
+                    
+                    <div class="field-analysis">
+                        <div class="analysis-grid">
+                            <div class="analysis-card">
+                                <h3>Spectral Analysis</h3>
+                                <div class="chart-container" style="position: relative; height: 300px;">
+                                    <canvas id="spectralChart"></canvas>
+                                </div>
+                            </div>
+                            
+                            <div class="analysis-card">
+                                <h3>Historical Trends</h3>
+                                <div class="chart-container" style="position: relative; height: 300px;">
+                                    <canvas id="trendsChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="ai-recommendations">
+                            <h3>AI Recommendations</h3>
+                            <div class="recommendations-list" id="recommendationsList">
+                                <!-- Recommendations will be populated by JavaScript -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Alerts View -->
+            <div id="alertsView" class="app-view">
+                <div class="view-header">
+                    <h1>Alert Management</h1>
+                    <p>Monitor and manage all farm alerts</p>
+                </div>
+                
+                <div class="alerts-filters">
+                    <div class="filter-group">
+                        <label for="severityFilter" class="form-label">Filter by Severity</label>
+                        <select id="severityFilter" class="form-control">
+                            <option value="">All Severities</option>
+                            <option value="High">High</option>
+                            <option value="Medium">Medium</option>
+                            <option value="Low">Low</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="typeFilter" class="form-label">Filter by Type</label>
+                        <select id="typeFilter" class="form-control">
+                            <option value="">All Types</option>
+                            <option value="Disease Risk">Disease Risk</option>
+                            <option value="Irrigation">Irrigation</option>
+                            <option value="Pest Risk">Pest Risk</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="detailed-alerts" id="detailedAlerts">
+                    <!-- Detailed alerts will be populated by JavaScript -->
+                </div>
+            </div>
+
+            <!-- Analytics View -->
+            <div id="analyticsView" class="app-view">
+                <div class="view-header">
+                    <h1>Analytics & Insights</h1>
+                    <p>Advanced analytics and predictive insights</p>
+                </div>
+                
+                <div class="analytics-grid">
+                    <div class="analytics-card wide">
+                        <h3>NDVI Trends Analysis</h3>
+                        <div class="chart-container" style="position: relative; height: 400px;">
+                            <canvas id="ndviChart"></canvas>
+                        </div>
+                    </div>
+                    
+                    <div class="analytics-card">
+                        <h3>Yield Predictions</h3>
+                        <div class="predictions-list" id="predictionsList">
+                            <!-- Predictions will be populated by JavaScript -->
+                        </div>
+                    </div>
+                    
+                    <div class="analytics-card">
+                        <h3>Market Insights</h3>
+                        <div class="market-data">
+                            <div class="market-item">
+                                <h4>AI Agriculture Market</h4>
+                                <p class="market-value">$46.6B by 2035</p>
+                            </div>
+                            <div class="market-item">
+                                <h4>Yield Improvement</h4>
+                                <p class="market-value">8-15%</p>
+                            </div>
+                            <div class="market-item">
+                                <h4>Cost Reduction</h4>
+                                <p class="market-value">20-35%</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div id="toastContainer" class="toast-container" aria-live="polite"></div>
+
+    <!-- Modal for detailed field view -->
+    <div id="fieldModal" class="modal hidden" role="dialog" aria-labelledby="modalTitle" aria-hidden="true">
+        <div class="modal-overlay"></div>
+        <div class="modal-content">
+            <header class="modal-header">
+                <h2 id="modalTitle">Field Details</h2>
+                <button class="modal-close" aria-label="Close modal">
+                    <i class="fas fa-times" aria-hidden="true"></i>
+                </button>
+            </header>
+            <div class="modal-body" id="modalBody">
+                <!-- Modal content will be populated by JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
